@@ -30,6 +30,7 @@
   # Enable demo mode with mock data for Netlify previews
   VITE_DEMO_MODE = "true"
   NODE_VERSION = "20"
+  NODE_OPTIONS = "--max_old_space_size=4096"
 
 # GitHub avatar proxy — avatars.githubusercontent.com is blocked by browser
 # when loaded inside SVG foreignObject. Proxy through our domain to avoid CORS.
