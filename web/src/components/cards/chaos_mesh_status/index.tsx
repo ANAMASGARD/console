@@ -54,7 +54,7 @@ export function ChaosMeshStatus() {
               </tr>
             </thead>
             <tbody>
-              {data.experiments.map(exp => (
+              {(data.experiments || []).map(exp => (
                 <tr key={`${exp.namespace}/${exp.name}`} className="border-b border-border/20 last:border-0">
                   <td className="py-2">{exp.name}</td>
                   <td className="py-2 text-muted-foreground">{exp.namespace}</td>
@@ -86,7 +86,7 @@ export function ChaosMeshStatus() {
                 </tr>
               </thead>
               <tbody>
-                {data.workflows.map(wf => (
+                {(data.workflows || []).map(wf => (
                   <tr key={`${wf.namespace}/${wf.name}`} className="border-b border-border/20 last:border-0">
                     <td className="py-2">{wf.name}</td>
                     <td className="py-2 text-muted-foreground">{wf.namespace}</td>
