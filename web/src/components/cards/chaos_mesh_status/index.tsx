@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { useChaosMeshStatus } from './useChaosMeshStatus'
 import { MetricTile } from '../../../lib/cards/CardComponents'
-import { SkeletonStats, SkeletonList } from '../../../lib/cards/Skeletons'
+import { SkeletonList, SkeletonStats } from '../../ui/Skeleton'
+import { Activity, CheckCircle2, XCircle } from 'lucide-react'
 
 export function ChaosMeshStatus() {
   const { t } = useTranslation('cards')
@@ -32,10 +33,10 @@ export function ChaosMeshStatus() {
 
       {/* Summary metrics */}
       <div className="card-metrics-row mb-6 mt-2 flex gap-4">
-        <MetricTile label={t('chaosMeshStatus.totalExperiments')} value={data?.summary.totalExperiments} colorClass="text-foreground" />
-        <MetricTile label={t('chaosMeshStatus.running')} value={data?.summary.running} colorClass="text-blue-400" />
-        <MetricTile label={t('chaosMeshStatus.finished')} value={data?.summary.finished} colorClass="text-green-400" />
-        <MetricTile label={t('chaosMeshStatus.failed')} value={data?.summary.failed} colorClass="text-red-400" />
+        <MetricTile label={t('chaosMeshStatus.totalExperiments')} value={data?.summary.totalExperiments} colorClass="text-foreground" icon={<Activity size={16} />} />
+        <MetricTile label={t('chaosMeshStatus.running')} value={data?.summary.running} colorClass="text-blue-500" icon={<Activity size={16} />} />
+        <MetricTile label={t('chaosMeshStatus.finished')} value={data?.summary.finished} colorClass="text-green-500" icon={<CheckCircle2 size={16} />} />
+        <MetricTile label={t('chaosMeshStatus.failed')} value={data?.summary.failed} colorClass="text-red-500" icon={<XCircle size={16} />} />
       </div>
 
       {/* Experiments list */}
