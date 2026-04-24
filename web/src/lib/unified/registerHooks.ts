@@ -1280,7 +1280,6 @@ function useUnifiedVitessStatus() {
     refetch: result.refetch,
   }
 }
-
 function useProviderHealth() {
   return useDemoDataHook(DEMO_PROVIDER_HEALTH)
 }
