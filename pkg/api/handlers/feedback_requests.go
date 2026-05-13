@@ -396,7 +396,7 @@ func (h *FeedbackHandler) ListAllFeatureRequests(c *fiber.Ctx) error {
 	// Get current user's GitHub login for ownership comparison
 	user, err := h.store.GetUser(c.UserContext(), userID)
 	if err != nil {
-		slog.Warn("[Feedback] failed to get user for queue", "userID", userID, "error", err)
+		slog.Warn("[Feedback] failed to get user for queue", "user_id", userID, "error", err)
 	}
 	currentGitHubLogin := ""
 	if user != nil {
