@@ -19,15 +19,19 @@ beforeEach(() => {
 describe('useQuantumQubitGridData', () => {
   it('returns disabled result with data null when isAuthenticated is false', () => {
     const mockRefetch = vi.fn()
+    const noisyCacheData = {
+      qubits: DEMO_QUANTUM_QUBITS,
+      versionInfo: DEMO_QUANTUM_STATUS.version_info ?? null,
+    }
     vi.mocked(useCache).mockReturnValue({
-      data: null,
-      isLoading: false,
-      isRefreshing: false,
-      isDemoFallback: false,
-      isFailed: false,
-      error: null,
-      consecutiveFailures: 0,
-      lastRefresh: null,
+      data: noisyCacheData,
+      isLoading: true,
+      isRefreshing: true,
+      isDemoFallback: true,
+      isFailed: true,
+      error: 'cache fetch failed',
+      consecutiveFailures: 5,
+      lastRefresh: 123456789,
       refetch: mockRefetch,
     })
 
@@ -43,7 +47,7 @@ describe('useQuantumQubitGridData', () => {
     expect(result.current.isFailed).toBe(false)
     expect(result.current.consecutiveFailures).toBe(0)
     expect(result.current.lastRefresh).toBeNull()
-    expect(typeof result.current.refetch).toBe('function')
+    expect(result.current.refetch).toBe(mockRefetch)
   })
 
   it('maps DEMO_QUANTUM_QUBITS and version_info correctly in demo mode', () => {
@@ -51,6 +55,22 @@ describe('useQuantumQubitGridData', () => {
       qubits: DEMO_QUANTUM_QUBITS,
       versionInfo: DEMO_QUANTUM_STATUS.version_info ?? null,
     }
+
+    vi.mocked(useCache).mockReturnValueOnce({
+      data: demoData,
+      isLoading: true,
+      isRefreshing: false,
+      isDemoFallback: true,
+      isFailed: false,
+      error: null,
+      consecutiveFailures: 0,
+      lastRefresh: null,
+      refetch: vi.fn(),
+    })
+    const { result: loadingResult } = renderHook(() =>
+      useQuantumQubitGridData({ isAuthenticated: true }),
+    )
+    expect(loadingResult.current.isDemoData).toBe(false)
 
     vi.mocked(useCache).mockReturnValueOnce({
       data: demoData,
