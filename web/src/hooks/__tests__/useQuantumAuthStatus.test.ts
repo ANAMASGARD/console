@@ -18,14 +18,14 @@ beforeEach(() => {
 describe('useQuantumAuthStatus', () => {
   it('returns disabled result with authenticated:false when isAuthenticated is false', () => {
     vi.mocked(useCache).mockReturnValue({
-      data: { authenticated: false },
-      isLoading: false,
-      isRefreshing: false,
-      isDemoFallback: false,
-      isFailed: false,
-      error: null,
-      consecutiveFailures: 0,
-      lastRefresh: null,
+      data: { authenticated: true },
+      isLoading: true,
+      isRefreshing: true,
+      isDemoFallback: true,
+      isFailed: true,
+      error: 'cache fetch failed',
+      consecutiveFailures: 5,
+      lastRefresh: 123456789,
       refetch: mockRefetch,
     })
 
@@ -41,7 +41,7 @@ describe('useQuantumAuthStatus', () => {
     expect(result.current.isFailed).toBe(false)
     expect(result.current.consecutiveFailures).toBe(0)
     expect(result.current.lastRefresh).toBeNull()
-    expect(typeof result.current.refetch).toBe('function')
+    expect(result.current.refetch).toBe(mockRefetch)
   })
 
   it('sets isDemoData=true only when isDemoFallback=true AND isLoading=false', () => {
