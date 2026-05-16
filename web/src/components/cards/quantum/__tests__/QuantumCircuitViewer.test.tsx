@@ -56,15 +56,29 @@ describe('QuantumCircuitViewer', () => {
     )
     const { container } = render(<QuantumCircuitViewer />)
     const pre = container.querySelector('pre.quantum-circuit-display')
-    expect(pre).toBeTruthy()
-    expect(pre?.textContent).toBe(ASCII)
-    expect(screen.queryByText('Unable to load quantum circuit diagram')).toBeNull()
+    expect(pre).not.toBeNull()
+    expect(pre).toBeInTheDocument()
+    expect(pre!.textContent).toBe(ASCII)
+    expect(screen.queryByText('Unable to load quantum circuit diagram')).not.toBeInTheDocument()
   })
 
   it('renders fallback message when data is null', () => {
     mockUseQuantumCircuitAscii.mockReturnValue(defaultHook({ data: null }))
     const { container } = render(<QuantumCircuitViewer />)
-    expect(container.querySelector('pre.quantum-circuit-display')).toBeNull()
-    expect(screen.getByText('Unable to load quantum circuit diagram')).toBeTruthy()
+    expect(container.querySelector('pre.quantum-circuit-display')).not.toBeInTheDocument()
+    expect(
+      screen.getByText('Unable to load quantum circuit diagram'),
+    ).toBeInTheDocument()
+  })
+
+  it('renders fallback message when circuitAscii is an empty string', () => {
+    mockUseQuantumCircuitAscii.mockReturnValue(
+      defaultHook({ data: { circuitAscii: '' } }),
+    )
+    const { container } = render(<QuantumCircuitViewer />)
+    expect(container.querySelector('pre.quantum-circuit-display')).not.toBeInTheDocument()
+    expect(
+      screen.getByText('Unable to load quantum circuit diagram'),
+    ).toBeInTheDocument()
   })
 })

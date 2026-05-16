@@ -74,26 +74,59 @@ describe('QuantumQubitGrid', () => {
     const { container } = render(<QuantumQubitGrid />)
 
     const infoBox = container.querySelector('.bg-blue-50')
-    expect(infoBox).toBeTruthy()
-    expect(within(infoBox as HTMLElement).getByText('5', { exact: true })).toBeTruthy()
-    expect(within(infoBox as HTMLElement).getByText('01010', { exact: true })).toBeTruthy()
-    expect(within(infoBox as HTMLElement).getByText('2.1.0', { exact: true })).toBeTruthy()
+    expect(infoBox).not.toBeNull()
+    expect(infoBox).toBeInTheDocument()
+    const info = within(infoBox as HTMLElement)
+    expect(info.getByText('5', { exact: true })).toBeInTheDocument()
+    expect(info.getByText('01010', { exact: true })).toBeInTheDocument()
+    expect(info.getByText('2.1.0', { exact: true })).toBeInTheDocument()
 
-    expect(screen.getByText('Quantum Qubit Display -- Latest Run')).toBeTruthy()
+    expect(screen.getByText('Quantum Qubit Display -- Latest Run')).toBeInTheDocument()
   })
 
   it('renders logo fallback with num_qubits=8 and empty pattern when data is null', () => {
     mockUseQuantumQubitGridData.mockReturnValue(defaultHook({ data: null }))
     const { container } = render(<QuantumQubitGrid />)
 
-    expect(screen.getByText('Quantum Qubit Display -- Latest Run')).toBeTruthy()
+    expect(screen.getByText('Quantum Qubit Display -- Latest Run')).toBeInTheDocument()
 
     const infoBox = container.querySelector('.bg-blue-50')
-    expect(infoBox).toBeTruthy()
-    expect(within(infoBox as HTMLElement).getByText('8', { exact: true })).toBeTruthy()
+    expect(infoBox).not.toBeNull()
+    expect(infoBox).toBeInTheDocument()
+    expect(within(infoBox as HTMLElement).getByText('8', { exact: true })).toBeInTheDocument()
 
-    expect(container.querySelector('svg')).toBeTruthy()
+    const svg = container.querySelector('svg')
+    expect(svg).not.toBeNull()
+    expect(svg).toBeInTheDocument()
 
-    expect(screen.queryByText('01010')).toBeNull()
+    expect(screen.queryByText('01010')).not.toBeInTheDocument()
+  })
+
+  it('renders logo fallback when hook returns qubits null but versionInfo is present', () => {
+    mockUseQuantumQubitGridData.mockReturnValue(
+      defaultHook({
+        data: {
+          qubits: null,
+          versionInfo: {
+            version: '9.9.9',
+            commit: 'deadbeef',
+            timestamp: '2026-05-02T12:00:00Z',
+          },
+        },
+      }),
+    )
+    const { container } = render(<QuantumQubitGrid />)
+
+    const infoBox = container.querySelector('.bg-blue-50')
+    expect(infoBox).not.toBeNull()
+    const info = within(infoBox as HTMLElement)
+    expect(info.getByText('8', { exact: true })).toBeInTheDocument()
+    expect(info.getByText('9.9.9', { exact: true })).toBeInTheDocument()
+    expect(info.getByText('deadbeef', { exact: true })).toBeInTheDocument()
+
+    const svg = container.querySelector('svg')
+    expect(svg).not.toBeNull()
+    expect(svg).toBeInTheDocument()
+    expect(screen.queryByText('01010')).not.toBeInTheDocument()
   })
 })
