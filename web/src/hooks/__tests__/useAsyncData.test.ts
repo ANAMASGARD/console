@@ -61,8 +61,8 @@ describe('useAsyncData', () => {
     expect(result.current.data).toBeNull()
     expect(result.current.loading).toBe(false)
 
-    act(() => {
-      result.current.refetch()
+    await act(async () => {
+      await result.current.refetch()
     })
 
     await waitFor(() => {
@@ -72,25 +72,41 @@ describe('useAsyncData', () => {
     expect(fetcher).toHaveBeenCalledTimes(1)
   })
 
-  it('refetch triggers another fetch without returning cleanup to caller', async () => {
+  it('refetch returns a promise and cancels the previous in-flight request', async () => {
+    let resolveFirst: (value: string) => void = () => {}
+    let resolveSecond: (value: string) => void = () => {}
     const fetcher = vi.fn()
-      .mockResolvedValueOnce('first')
-      .mockResolvedValueOnce('second')
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveFirst = resolve
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveSecond = resolve
+          }),
+      )
+
     const { result } = renderHook(() =>
-      useAsyncData(fetcher, [], { enabled: false, initialData: null }),
+      useAsyncData(fetcher, [], { enabled: false }),
     )
 
+    let firstPromise: Promise<void> | undefined
     act(() => {
-      result.current.refetch()
+      firstPromise = result.current.refetch()
     })
 
-    await waitFor(() => {
-      expect(result.current.data).toBe('first')
+    await act(async () => {
+      const secondPromise = result.current.refetch()
+      resolveSecond('second')
+      await secondPromise
     })
 
-    act(() => {
-      const ret = result.current.refetch()
-      expect(ret).toBeUndefined()
+    await act(async () => {
+      resolveFirst('stale-first')
+      await firstPromise
     })
 
     await waitFor(() => {
@@ -100,7 +116,7 @@ describe('useAsyncData', () => {
     expect(fetcher).toHaveBeenCalledTimes(2)
   })
 
-  it('ignores stale results after unmount', async () => {
+  it('ignores stale results after unmount when enabled is false', async () => {
     let resolveFetch: (value: string) => void = () => {}
     const fetcher = vi.fn(
       () =>
@@ -110,8 +126,12 @@ describe('useAsyncData', () => {
     )
 
     const { result, unmount } = renderHook(() =>
-      useAsyncData(fetcher, []),
+      useAsyncData(fetcher, [], { enabled: false }),
     )
+
+    act(() => {
+      void result.current.refetch()
+    })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(true)

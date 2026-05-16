@@ -362,29 +362,29 @@ export function PodDrillDown({ data }: { data: Record<string, unknown> }) {
     enabled: false,
   })
 
-  const fetchDescribe = (force = false) => {
+  const fetchDescribe = async (force = false): Promise<void> => {
     if (!agentConnected || (!force && describeOutput)) return
-    refetchDescribe()
+    await refetchDescribe()
   }
 
-  const fetchLogs = (force = false) => {
+  const fetchLogs = async (force = false): Promise<void> => {
     if (!agentConnected || (!force && logsOutput)) return
-    refetchLogs()
+    await refetchLogs()
   }
 
-  const fetchEvents = (force = false) => {
+  const fetchEvents = async (force = false): Promise<void> => {
     if (!agentConnected || (!force && eventsOutput)) return
-    refetchEvents()
+    await refetchEvents()
   }
 
-  const fetchYaml = (force = false) => {
+  const fetchYaml = async (force = false): Promise<void> => {
     if (!agentConnected || (!force && yamlOutput)) return
-    refetchYaml()
+    await refetchYaml()
   }
 
-  const fetchPodStatus = (force = false) => {
+  const fetchPodStatus = async (force = false): Promise<void> => {
     if (!agentConnected || (!force && podStatusOutput)) return
-    refetchPodStatus()
+    await refetchPodStatus()
   }
 
   const baseIssues = useMemo(() => {
@@ -655,9 +655,9 @@ Be specific and reference actual values from the data. Keep response to 3-4 sent
     enabled: false,
   })
 
-  const fetchAiAnalysis = () => {
+  const fetchAiAnalysis = async (): Promise<void> => {
     if (backendActionUnavailable || !agentConnected || aiAnalysisLoading) return
-    refetchAiAnalysis()
+    await refetchAiAnalysis()
   }
 
   const filteredDisplayIssues = useMemo(

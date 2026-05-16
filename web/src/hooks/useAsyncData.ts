@@ -2,13 +2,14 @@
  * Generic async data hook for drill-down views and cards.
  * Manages data/loading/error state with cancellation on unmount or dependency change.
  */
-import { useState, useEffect, useCallback, type DependencyList } from 'react'
+import { useState, useEffect, useCallback, useRef, type DependencyList } from 'react'
 
 export interface AsyncState<T> {
   data: T | null
   loading: boolean
   error: string | null
-  refetch: () => void
+  /** Re-runs the fetcher; cancels any in-flight request. Returns a promise that settles when the run finishes. */
+  refetch: () => Promise<void>
 }
 
 export interface UseAsyncDataOptions<T> {
@@ -30,11 +31,27 @@ export function useAsyncData<T>(
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const run = useCallback(() => {
+  const cancelActiveRef = useRef<(() => void) | null>(null)
+
+  const run = useCallback((): Promise<void> => {
+    cancelActiveRef.current?.()
+    cancelActiveRef.current = null
+
     let cancelled = false
     setLoading(true)
     setError(null)
-    fetcher()
+
+    const finish = () => {
+      if (!cancelled) {
+        cancelActiveRef.current = null
+      }
+    }
+
+    cancelActiveRef.current = () => {
+      cancelled = true
+    }
+
+    return fetcher()
       .then((result) => {
         if (!cancelled) {
           setData(result)
@@ -47,22 +64,28 @@ export function useAsyncData<T>(
           setLoading(false)
         }
       })
-    return () => {
-      cancelled = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- caller controls invalidation via deps
-  }, deps)
+      .finally(finish)
+  }, deps) // eslint-disable-line react-hooks/exhaustive-deps -- caller controls invalidation via deps
 
   useEffect(() => {
     if (!enabled) {
       return
     }
-    return run()
+    void run()
+    return () => {
+      cancelActiveRef.current?.()
+      cancelActiveRef.current = null
+    }
   }, [run, enabled])
 
-  const refetch = useCallback(() => {
-    run()
-  }, [run])
+  useEffect(() => {
+    return () => {
+      cancelActiveRef.current?.()
+      cancelActiveRef.current = null
+    }
+  }, [])
+
+  const refetch = useCallback(() => run(), [run])
 
   return { data, loading, error, refetch }
 }
