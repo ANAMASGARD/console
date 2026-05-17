@@ -7,8 +7,8 @@ const STELLAR_ACTIVITY_LIMIT = 200
 const STELLAR_DEFAULT_FETCH_LIMIT = 50
 const STELLAR_RECONNECT_BASE_MS = 1000
 const STELLAR_RECONNECT_MAX_MS = 30000
-const STELLAR_TOKEN_POLL_INTERVAL_MS = 100
-const STELLAR_TOKEN_POLL_MAX_ATTEMPTS = 30
+export const STELLAR_TOKEN_POLL_INTERVAL_MS = 100
+export const STELLAR_TOKEN_POLL_MAX_ATTEMPTS = 30
 
 /** Dispatched on window when the shared SSE receives a mission_trigger event. */
 export const STELLAR_MISSION_TRIGGER_EVENT = 'stellar:mission_trigger'
@@ -322,6 +322,14 @@ function useStellarSource() {
 
   useEffect(() => {
     let cancelled = false
+    let tokenPollIntervalId: ReturnType<typeof setInterval> | undefined
+
+    const clearTokenPollInterval = () => {
+      if (tokenPollIntervalId !== undefined) {
+        clearInterval(tokenPollIntervalId)
+        tokenPollIntervalId = undefined
+      }
+    }
 
     const waitForToken = (): Promise<void> => {
       return new Promise((resolve) => {
@@ -330,10 +338,10 @@ function useStellarSource() {
           return
         }
         let attempts = 0
-        const interval = setInterval(() => {
+        tokenPollIntervalId = setInterval(() => {
           attempts++
           if (hasStellarAuthCredentials() || attempts > STELLAR_TOKEN_POLL_MAX_ATTEMPTS) {
-            clearInterval(interval)
+            clearTokenPollInterval()
             resolve()
           }
         }, STELLAR_TOKEN_POLL_INTERVAL_MS)
@@ -359,6 +367,7 @@ function useStellarSource() {
 
     return () => {
       cancelled = true
+      clearTokenPollInterval()
       esRef.current?.close()
       esRef.current = null
     }

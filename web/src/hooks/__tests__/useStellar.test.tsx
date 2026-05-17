@@ -143,7 +143,13 @@ afterEach(() => {
 // Import subject after mocks
 // ---------------------------------------------------------------------------
 
-import { StellarProvider, STELLAR_MISSION_TRIGGER_EVENT, useStellar } from '../useStellar'
+import {
+  StellarProvider,
+  STELLAR_MISSION_TRIGGER_EVENT,
+  STELLAR_TOKEN_POLL_INTERVAL_MS,
+  STELLAR_TOKEN_POLL_MAX_ATTEMPTS,
+  useStellar,
+} from '../useStellar'
 
 // ---------------------------------------------------------------------------
 // Helper: render a consumer inside StellarProvider
@@ -715,6 +721,28 @@ describe('StellarProvider — SSE lifecycle (#14220)', () => {
     await act(async () => { await Promise.resolve() })
     expect(eventSourceInstances).toHaveLength(0)
     expect(mockStellarApi.getState).not.toHaveBeenCalled()
+  })
+
+  it('clears token poll interval on unmount before poll completes', async () => {
+    vi.useFakeTimers()
+    localStorage.clear()
+    Object.defineProperty(document, 'cookie', {
+      writable: true,
+      value: '',
+    })
+
+    const { unmount } = renderWithProvider()
+    await act(async () => { await Promise.resolve() })
+    unmount()
+
+    const eventSourceCountAfterUnmount = eventSourceInstances.length
+    await act(async () => {
+      vi.advanceTimersByTime(STELLAR_TOKEN_POLL_MAX_ATTEMPTS * STELLAR_TOKEN_POLL_INTERVAL_MS)
+    })
+
+    expect(mockStellarApi.getState).not.toHaveBeenCalled()
+    expect(eventSourceInstances).toHaveLength(eventSourceCountAfterUnmount)
+    vi.useRealTimers()
   })
 })
 
