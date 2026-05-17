@@ -466,7 +466,7 @@ jobs:
                   ``,
                   failedSection,
                   ``,
-                  `Coverage was merged. Badge update was skipped due to test failures.`,
+                  `Coverage was merged. Badge update was skipped due to a test shard failure.`,
                   ``,
                   `### Action needed`,
                   `1. For each failing test, determine if it's a **test update needed** or a **potential regression**`,
@@ -482,5 +482,5 @@ jobs:
       - name: Fail if any shard failed
         if: needs.test-shard.result == 'failure'
         run: |
-          echo "::error::One or more test shards failed. Coverage was still merged and badge updated, but this workflow is marked as failed."
+          echo "::error::One or more test shards failed. Coverage was merged; badge update was skipped."
           exit 1
