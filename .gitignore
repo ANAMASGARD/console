@@ -98,4 +98,12 @@ console-kb-*
 console-marketplace-*
 marketplace-fix*
 homebrew-tap-*
+*-worktree/
+*-worktree
+worktree-*/
+docs-*/
+console-kb-*/
+console-marketplace-*/
+homebrew-tap-*/
+marketplace-fix*
 kubestellar-mcp
