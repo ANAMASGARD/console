@@ -16,7 +16,7 @@ interface LogoWithStarProps {
  * Star decoration is controlled by branding config (KubeStellar-specific).
  */
 export function LogoWithStar({ className, logoClassName, alt, showStar }: LogoWithStarProps) {
-  const { logoUrl, appShortName, showStarDecoration } = useBranding()
+  const { logoUrl, showStarDecoration } = useBranding()
 
   /** Respect explicit prop override; fall back to branding config */
   const renderStar = showStar ?? showStarDecoration
@@ -25,7 +25,7 @@ export function LogoWithStar({ className, logoClassName, alt, showStar }: LogoWi
     <div className={cn('relative inline-flex items-center justify-center', className)}>
       <img
         src={logoUrl}
-        alt={alt || appShortName}
+        alt={alt || 'KubeStellar logo'}
         className={cn('w-full h-full', logoClassName)}
         loading="lazy"
       />
